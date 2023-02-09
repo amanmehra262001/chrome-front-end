@@ -5,25 +5,21 @@ import { useEffect, useState } from "react";
 import { onValue, ref } from "firebase/database";
 
 export default function Home() {
-  const [data, setData] = useState<any>(null);
-
-  const fetchData = async () => {
-    // const dataRef = ref(rdb, "uploads/-NNovLsFxN3RuIhqmIKO");
-    const dataRef = ref(rdb, "uploads/-NNovLsFxN3RuIhqmIKO");
-    try {
-      onValue(dataRef, (snapshot) => {
-        const data = snapshot?.val();
-        console.log(data);
-        setData(data);
-      });
-    } catch (error) {
-      console.log("error in fetching data:", error);
-    }
-  };
+  const [uploads, setUploads] = useState<any>({});
 
   useEffect(() => {
-    fetchData();
+    const uploadsRef = ref(rdb, "uploads");
+    try {
+      onValue(uploadsRef, (snapshot) => {
+        const data = snapshot?.val();
+        console.log(data);
+        setUploads(data);
+      });
+    } catch (error) {
+      console.log("error in fetching upload data:", error);
+    }
   }, []);
+
   return (
     <>
       <Head>
@@ -33,15 +29,23 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        {data &&
-          Object.keys(data?.images).map((key) => (
-            <Image
-              width={100}
-              height={100}
-              src={data?.images[key]}
-              alt="Picture of the Screenshot"
-            />
-          ))}
+        {uploads &&
+          Object.keys(uploads).map((key) => {
+            return (
+              <>
+                <h1 style={{ marginBottom: "50px" }}>DeviceId: {key}</h1>
+                {uploads[key]?.images &&
+                  Object.keys(uploads[key]?.images).map((childKey) => (
+                    <Image
+                      width={100}
+                      height={100}
+                      src={uploads[key]?.images[childKey]}
+                      alt="Picture of the Screenshot"
+                    />
+                  ))}
+              </>
+            );
+          })}
       </main>
     </>
   );
